@@ -11,7 +11,7 @@ export default function Publications() {
             <div className="mb-10">
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-100">Publications</h2>
                 <p className="mt-2 text-slate-400">
-                    Selected works from recent years.
+                    Sorted chronologically
                 </p>
             </div>
 
@@ -19,7 +19,7 @@ export default function Publications() {
                 {publications.map((pub) => (
                     <div
                         key={pub.id}
-                        className="group relative flex flex-col gap-2 rounded-2xl border border-white/5 bg-white/5 p-6 transition hover:border-white/10 hover:bg-white/10 sm:flex-row sm:items-start sm:gap-6"
+                        className="group relative flex flex-col gap-2 rounded-2xl border border-white/5 bg-white/5 p-6 transition hover:border-white/10 hover:bg-white/10 sm:flex-row sm:items-center sm:gap-6"
                     >
                         <div className="absolute -inset-px rounded-2xl border-2 border-transparent bg-gradient-to-b from-sky-500/10 to-transparent opacity-0 transition group-hover:opacity-100 pointer-events-none" />
 
@@ -43,14 +43,16 @@ export default function Publications() {
                             </div>
                         </div>
 
-                        {/* Placeholder for link if available in the future */}
+                        {/* Link to paper */}
                         {pub.url && (
-                            <div className="shrink-0">
-                                <a href={pub.url} target="_blank" rel="noopener noreferrer" className="p-2 text-slate-400 hover:text-white">
-                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-                                        <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
-                                    </svg>
+                            <div className="mt-4 sm:mt-0 shrink-0">
+                                <a
+                                    href={pub.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/10 hover:text-white hover:border-white/20 group/link"
+                                >
+                                    Read Paper <span aria-hidden="true" className="group-hover/link:translate-x-0.5 transition-transform">&rarr;</span>
                                 </a>
                             </div>
                         )}

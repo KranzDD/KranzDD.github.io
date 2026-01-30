@@ -283,7 +283,7 @@ export default function App() {
               <img
                 src={dominikImg}
                 alt="Dominik D. Kranz"
-                className="float-left mr-6 mb-4 h-48 w-48 border-white/30 rounded-full border-4 border-slate-900/50 object-cover shadow-2xl shadow-sky-900/20 ring-1 ring-white/10"
+                className="float-left mr-6 mb-4 h-48 w-48 border-white/30 rounded-full border-4 border-slate-900/50 object-cover object-[50%_0%] shadow-2xl shadow-sky-900/20 ring-1 ring-white/10"
               />
               <p className="text-lg leading-relaxed tracking-wide text-white/70 max-w-prose">
                 I work on artificial intelligence methods for interpreting clinical time-series data, with a
@@ -304,32 +304,42 @@ export default function App() {
                 robust across heterogeneous patient cohorts and measurement settings. A central goal of
                 this work is to bridge methodological advances in deep learning with rigorous
                 clinical validation, enabling models that generalize across centers and support
-                translational use.
+                translational use. I currently pursue my work at <span className="text-xl font-medium text-sky-300/90">Charité - Universitätsmedizin Berlin</span>, and the <span className="text-xl font-medium text-sky-300/90">Berlin Institute of Health</span>.
+
               </p>
             </div>
 
             {/* Highlighted publication */}
-            <div className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10">
-              <div className="absolute -inset-px rounded-2xl border-2 border-transparent bg-gradient-to-b from-sky-500/20 to-transparent opacity-0 transition group-hover:opacity-100" />
-              <div className="relative">
-                <div className="text-xs font-medium text-sky-300">Recent Publication</div>
-                <h3 className="mt-2 text-lg font-semibold text-slate-100 group-hover:text-white">
-                  Exploring Latent Diffusion Models for ECG Generation on the Minute Scale
-                </h3>
-                <p className="mt-1 text-sm text-slate-400">
-                  Kranz DD, et al. · <span className="text-slate-300">Computer Methods and Programs in Biomedicine (2025)</span>
+            <div className="flex flex-col gap-4">
+              <div className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10">
+                <div className="absolute -inset-px rounded-2xl border-2 border-transparent bg-gradient-to-b from-sky-500/20 to-transparent opacity-0 transition group-hover:opacity-100" />
+                <div className="relative">
+                  <div className="text-sm font-medium text-sky-300">Recent Publication</div>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-100 group-hover:text-white">
+                    Exploring Latent Diffusion Models for ECG Generation on the Minute Scale
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Kranz DD, et al. · <span className="text-slate-300">Computer Methods and Programs in Biomedicine (2025)</span>
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
+                      Diffusion Models
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
+                      ECG
+                    </span>
+                  </div>
+                  <a href="https://doi.org/10.1016/j.cmpb.2025.109138" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-sky-200 hover:text-sky-100 transition">
+                    Read Paper <span aria-hidden="true">&rarr;</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <div className="text-2xl font-semibold text-sky-300">Why it matters</div>
+                <p className="text-lg leading-relaxed tracking-wide text-white/70">
+                  This paper introduces <span className="font-medium text-sky-200/90">ECGEN</span>, a <span className="font-medium text-sky-200/90">next-generation diffusion model</span> that pushes generative AI beyond short snippets toward <span className="font-medium text-sky-200/90">minute-scale physiological signals</span>. By synthesizing realistic, <span className="font-medium text-sky-200/90">long-duration ECGs</span> and enabling tasks like <span className="font-medium text-sky-200/90">inpainting</span> and <span className="font-medium text-sky-200/90">signal restoration</span>, ECGEN explores how <span className="font-medium text-sky-200/90">foundation-style generative models</span> could reshape data availability, robustness, and evaluation in clinical AI.
                 </p>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                    Diffusion Models
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                    ECG
-                  </span>
-                </div>
-                <div className="mt-5 flex items-center gap-2 text-sm font-medium text-sky-200">
-                  Read Paper <span aria-hidden="true">&rarr;</span>
-                </div>
               </div>
             </div>
           </div>
