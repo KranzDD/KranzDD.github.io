@@ -1,362 +1,96 @@
-import { useEffect, useMemo, useState } from "react";
-import bannerImg from "./assets/banner.png";
-import dominikImg from "./assets/dominik.png";
-import Publications from "./components/Publications";
+import dominikImg from './assets/dominik.png';
+import Publications from './components/Publications';
+import HeroAtmosphere from './components/HeroAtmosphere';
+import bibContent from './assets/publications.bib?raw';
+import { parseBibtex } from './utils/parseBibtex';
 
-type NavItem = {
-  label: string;
-  href: string;
-};
-
-type FocusCard = {
-  title: string;
-  description: string;
-  icon: "wave" | "spark" | "globe" | "clinic";
-};
-
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-function Icon({ name }: { name: FocusCard["icon"] }) {
-  const common = "h-5 w-5 text-sky-200";
-  switch (name) {
-    case "wave":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M2 12h3l2-6 4 12 3-9 2 3h4"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      );
-    case "spark":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M12 2l1.2 4.6L18 8l-4.8 1.4L12 14l-1.2-4.6L6 8l4.8-1.4L12 2z"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M5 14l.8 3L9 18l-3.2 1-.8 3-.8-3L1 17l3.2-1L5 14z"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinejoin="round"
-            opacity="0.8"
-          />
-        </svg>
-      );
-    case "globe":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M12 22a10 10 0 100-20 10 10 0 000 20z"
-            stroke="currentColor"
-            strokeWidth="1.7"
-          />
-          <path
-            d="M2 12h20"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            opacity="0.9"
-          />
-          <path
-            d="M12 2c3 2.6 5 6.2 5 10s-2 7.4-5 10c-3-2.6-5-6.2-5-10S9 4.6 12 2z"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            opacity="0.85"
-          />
-        </svg>
-      );
-    case "clinic":
-      return (
-        <svg className={common} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M4 20V6a2 2 0 012-2h12a2 2 0 012 2v14"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinejoin="round"
-          />
-          <path
-            d="M9 20v-6h6v6"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinejoin="round"
-            opacity="0.9"
-          />
-          <path
-            d="M12 7v4m-2-2h4"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-          />
-        </svg>
-      );
-    default:
-      return null;
-  }
-}
-
-function Button({
-  href,
-  children,
-  variant = "primary",
-}: {
-  href?: string;
-  children: React.ReactNode;
-  variant?: "primary" | "ghost";
-}) {
-  const base =
-    "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/60 focus-visible:ring-offset-0";
-  const styles =
-    variant === "primary"
-      ? "bg-sky-500/20 text-sky-100 ring-1 ring-sky-400/30 hover:bg-sky-500/28 hover:ring-sky-300/40"
-      : "bg-white/0 text-slate-100 ring-1 ring-white/10 hover:bg-white/5 hover:ring-white/15";
-  const cls = cn(base, styles);
-
-  if (href) {
-    return (
-      <a href={href} className={cls}>
-        {children}
-      </a>
-    );
-  }
-  return <button className={cls}>{children}</button>;
-}
-
-function SectionTitle({
-  title,
-  subtitle,
-  right,
-}: {
-  title: string;
-  subtitle?: string;
-  right?: React.ReactNode;
-}) {
-  return (
-    <div className="flex items-end justify-between gap-4">
-      <div>
-        <h2 className="text-xl font-semibold tracking-tight text-slate-100">{title}</h2>
-        {subtitle ? (
-          <p className="mt-1 text-sm text-slate-300/80">{subtitle}</p>
-        ) : null}
-      </div>
-      {right ? <div className="shrink-0">{right}</div> : null}
-    </div>
-  );
-}
+const scholarUrl = 'https://scholar.google.com/citations?user=Fs0ANr0AAAAJ&hl=en';
+const publications = parseBibtex(bibContent);
+const selectedResearch = [
+  {
+    id: 'kranz2026selfsupervised', signal: 'MCG', topic: 'Representation learning',
+    title: 'Learning the structure of cardiac signals',
+    description: 'MCG2Vec learns representations from multichannel magnetocardiography. We investigate how these representations capture cardiac physiology across coronary, ventricular, and rhythm-related tasks.',
+  },
+  {
+    id: 'kranz2026exploring', signal: 'ECG', topic: 'Generative modeling',
+    title: 'Generating ECGs on the minute scale',
+    description: 'ECGEN explores latent diffusion for ECG generation and inpainting, from short rhythm-specific recordings to minute-scale signals. The work also examines the limits of long-duration generation.',
+  },
+  {
+    id: 'krumm2025toward', signal: 'EEG', topic: 'Clinical interpretation',
+    title: 'A shared map of brain activity',
+    description: 'The Universal Map of EEG places recordings in a shared representation space, connecting recognizable brain activity patterns with classification, clustering, and prognostication.',
+  },
+];
 
 export default function App() {
-  const nav: NavItem[] = useMemo(
-    () => [
-      { label: "Research", href: "#about" },
-      { label: "Publications", href: "#publications" },
-      { label: "Contact", href: "#contact" },
-    ],
-    []
-  );
-
-  const focusCards: FocusCard[] = useMemo(
-    () => [
-      {
-        title: "Clinical Signal AI",
-        description: "ECG, EEG, ICU waveforms",
-        icon: "wave",
-      },
-      {
-        title: "Generative Models",
-        description: "Diffusion, self-supervised learning",
-        icon: "spark",
-      },
-      {
-        title: "Multicenter Validation",
-        description: "Robust medical AI",
-        icon: "globe",
-      },
-      {
-        title: "Translational Research",
-        description: "From signals to clinics",
-        icon: "clinic",
-      },
-    ],
-    []
-  );
-
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div className="min-h-dvh bg-[#070a10] text-slate-100">
-      {/* Background */}
-      <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(1200px_700px_at_10%_-10%,rgba(56,189,248,0.20),transparent_60%),radial-gradient(900px_500px_at_90%_10%,rgba(34,211,238,0.14),transparent_55%),radial-gradient(800px_600px_at_50%_110%,rgba(99,102,241,0.12),transparent_60%)]" />
-        <div className="absolute inset-0 opacity-[0.13] [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:48px_48px]" />
-        <div className="absolute inset-0 bg-noise opacity-[0.22]" />
-      </div>
-
-      {/* Header */}
-      <header
-        className={cn(
-          "sticky top-0 z-50 border-b border-white/5 backdrop-blur supports-[backdrop-filter]:bg-black/20",
-          scrolled && "bg-black/35"
-        )}
-      >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <a href="#" className="text-base font-semibold tracking-tight text-slate-100">
-            Dominik D. Kranz
-          </a>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            {nav.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="text-sm text-slate-200/80 hover:text-slate-100 transition"
-              >
-                {item.label}
-              </a>
-            ))}
+    <>
+      <a className="skip-link" href="#main">Skip to content</a>
+      <header className="site-header">
+        <div className="container header-inner">
+          <a className="wordmark" href="#about" aria-label="Dominik D. Kranz — introduction">Dominik D. Kranz<span aria-hidden="true">.</span></a>
+          <nav aria-label="Main navigation">
+            <a href="#research">Research</a>
+            <a href="#publications">Publications</a>
+            <a href="#contact">Contact</a>
           </nav>
-
-          <div className="flex items-center gap-2">
-          </div>
         </div>
       </header>
-
-      {/* Main */}
-      <main className="w-full">
-        {/* Hero */}
-        <section className="relative overflow-hidden border-b border-white/5 bg-white/2 py-24 md:py-48">
-          {/* Background image */}
-          <div className="absolute inset-0">
-            <img
-              src={bannerImg}
-              alt=""
-              className="h-full w-full object-cover object-center"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-
-          {/* Content */}
-          <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-10 px-6 md:grid-cols-2">
-            <div className="rounded-3xl border border-sky-500/10 bg-slate-900/50 p-8 shadow-[0_0_40px_-10px_rgba(14,165,233,0.15)]">
-              <p className="text-sm font-medium text-slate-300/90">Medical AI Researcher</p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-50 md:text-5xl">
-                Artificial Intelligence for <span className="text-sky-200">Clinical Signals</span>
-              </h1>
-              <p className="mt-4 max-w-prose text-base leading-relaxed text-slate-200/80">
-                Representation learning and generative modeling of EEG, ECG, MCG, and ICU time series
-              </p>
-
-              <div className="mt-7 flex flex-wrap gap-3">
-                <Button href="#publications" variant="primary">
-                  View Publications
-                </Button>
-                <Button href="https://github.com/" variant="ghost">
-                  GitHub
-                </Button>
-              </div>
+      <main id="main">
+        <section id="about" className="hero-stage" aria-labelledby="intro-title">
+          <HeroAtmosphere />
+          <div className="container hero">
+          <div className="hero-copy">
+            <p className="eyebrow">Medical AI researcher · Berlin</p>
+            <h1 id="intro-title">Dominik D. Kranz</h1>
+            <p className="hero-statement">Understanding clinical signals<br className="desktop-break" /> through <span>machine learning.</span></p>
+            <p className="intro">I develop representation learning and generative models for EEG, ECG, MCG, and ICU time series, with a focus on clinically meaningful representations and rigorous validation.</p>
+            <p className="affiliations">Charité – Universitätsmedizin Berlin<br />Berlin Institute of Health</p>
+            <div className="hero-actions">
+              <a className="button button-primary" href="#publications">Explore publications <span aria-hidden="true">↓</span></a>
+              <a className="text-link" href={scholarUrl}>Google Scholar <span aria-hidden="true">↗</span></a>
             </div>
-
-            {/* Right column stays empty on desktop (image is background); but keep structure */}
-            <div className="hidden md:block" />
+          </div>
+          <div className="portrait-frame">
+            <img src={dominikImg} alt="Dominik D. Kranz" width="360" height="420" fetchPriority="high" />
+            <div className="portrait-caption"><span className="status-dot" aria-hidden="true" />Clinical signals. Meaningful representations.</div>
+          </div>
           </div>
         </section>
-
-        {/* About (moved above Research Focus) */}
-        <section id="about" className="mx-auto max-w-[1600px] px-6 py-10">
-          <div className="grid gap-12 md:grid-cols-2 items-start">
-            <div className="relative">
-              <img
-                src={dominikImg}
-                alt="Dominik D. Kranz"
-                className="float-left mr-6 mb-4 h-48 w-48 border-white/30 rounded-full border-4 border-slate-900/50 object-cover object-[50%_0%] shadow-2xl shadow-sky-900/20 ring-1 ring-white/10"
-              />
-              <p className="text-lg leading-relaxed tracking-wide text-white/70 max-w-prose">
-                I work on artificial intelligence methods for interpreting clinical time-series data, with a
-                focus on electrophysiological signals such as{" "}
-                <span className="text-xl font-medium text-sky-300/90">EEG</span>,{" "}
-                <span className="text-xl font-medium text-sky-300/90">ECG</span>,{" "}
-                <span className="text-xl font-medium text-sky-300/90">MCG</span>, and{" "}
-                <span className="text-xl font-medium text-sky-300/90">ICU waveforms</span>.{" "}
-                My research centers on{" "}
-                <span className="font-medium text-sky-200/90">
-                  self-supervised representation learning
-                </span>{" "}
-                and{" "}
-                <span className="font-medium text-sky-200/90">
-                  generative modeling
-                </span>{" "}
-                approaches that can leverage large-scale routine clinical recordings while remaining
-                robust across heterogeneous patient cohorts and measurement settings. A central goal of
-                this work is to bridge methodological advances in deep learning with rigorous
-                clinical validation, enabling models that generalize across centers and support
-                translational use. I currently pursue my work at <span className="text-xl font-medium text-sky-300/90">Charité - Universitätsmedizin Berlin</span>, and the <span className="text-xl font-medium text-sky-300/90">Berlin Institute of Health</span>.
-
-              </p>
-            </div>
-
-            {/* Highlighted publication */}
-            <div className="flex flex-col gap-4">
-              <div className="group relative rounded-2xl border border-white/10 bg-white/5 p-6 transition hover:bg-white/10">
-                <div className="absolute -inset-px rounded-2xl border-2 border-transparent bg-gradient-to-b from-sky-500/20 to-transparent opacity-0 transition group-hover:opacity-100" />
-                <div className="relative">
-                  <div className="text-sm font-medium text-sky-300">Recent Publication</div>
-                  <h3 className="mt-2 text-lg font-semibold text-slate-100 group-hover:text-white">
-                    Exploring Latent Diffusion Models for ECG Generation on the Minute Scale
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Kranz DD, et al. · <span className="text-slate-300">Computer Methods and Programs in Biomedicine (2025)</span>
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                      Diffusion Models
-                    </span>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-300">
-                      ECG
-                    </span>
+        <section id="research" className="container section research-section" aria-labelledby="research-title">
+          <div className="section-heading">
+            <div><p className="eyebrow">Selected research</p><h2 id="research-title">From signals to understanding</h2></div>
+            <p>I work across cardiac and neural signals, connecting advances in machine learning with questions from clinical practice.</p>
+          </div>
+          <div className="research-grid">
+            {selectedResearch.map((research) => {
+              const publication = publications.find((pub) => pub.id === research.id)!;
+              return (
+                <article className="research-card" key={research.id}>
+                  <div className="research-card-top"><span className="signal-label">{research.signal}</span><span>{research.topic}</span></div>
+                  <h3>{research.title}</h3>
+                  <p>{research.description}</p>
+                  <div className="research-card-footer">
+                    <p>{publication.venue} · {publication.year}</p>
+                    <a className="text-link" href={publication.url} aria-label={`Read paper: ${publication.title}`}>Read paper <span aria-hidden="true">↗</span></a>
                   </div>
-                  <a href="https://doi.org/10.1016/j.cmpb.2025.109138" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-sky-200 hover:text-sky-100 transition">
-                    Read Paper <span aria-hidden="true">&rarr;</span>
-                  </a>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <div className="text-2xl font-semibold text-sky-300">Why it matters</div>
-                <p className="text-lg leading-relaxed tracking-wide text-white/70">
-                  This paper introduces <span className="font-medium text-sky-200/90">ECGEN</span>, a <span className="font-medium text-sky-200/90">next-generation diffusion model</span> that pushes generative AI beyond short snippets toward <span className="font-medium text-sky-200/90">minute-scale physiological signals</span>. By synthesizing realistic, <span className="font-medium text-sky-200/90">long-duration ECGs</span> and enabling tasks like <span className="font-medium text-sky-200/90">inpainting</span> and <span className="font-medium text-sky-200/90">signal restoration</span>, ECGEN explores how <span className="font-medium text-sky-200/90">foundation-style generative models</span> could reshape data availability, robustness, and evaluation in clinical AI.
-                </p>
-              </div>
-            </div>
+                </article>
+              );
+            })}
           </div>
         </section>
-
-        {/* Publications */}
-        <Publications />
-
-        {/* Footer */}
-        <footer id="contact" className="mx-auto max-w-7xl px-6 py-10">
-          <div className="h-px w-full bg-white/8" />
-          <div className="mt-6 flex flex-col gap-2 text-xs text-slate-200/60 sm:flex-row sm:items-center sm:justify-between">
-            <div>Berlin · Medical AI</div>
-            {/* <div className="text-slate-200/50">Built with React · Vite · Tailwind · TypeScript</div> */}
-          </div>
-        </footer>
+        <Publications publications={publications} scholarUrl={scholarUrl} />
       </main>
-    </div >
+      <footer id="contact" className="container contact" aria-labelledby="contact-title">
+        <div><p className="eyebrow">Contact</p><h2 id="contact-title">Let’s connect.</h2><p>For research questions and potential collaborations.</p></div>
+        <div className="contact-links">
+          <a className="email-link" href="mailto:dominik-dirk.kranz@charite.de">dominik-dirk.kranz@charite.de <span aria-hidden="true">↗</span></a>
+          <a className="text-link" href={scholarUrl}>Google Scholar <span aria-hidden="true">↗</span></a>
+        </div>
+        <div className="footer-meta"><span>Dominik D. Kranz · Berlin</span><a href="#about">Back to top ↑</a></div>
+      </footer>
+    </>
   );
 }

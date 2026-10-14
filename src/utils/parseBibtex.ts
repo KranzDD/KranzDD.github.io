@@ -1,146 +1,87 @@
-
 export type Publication = {
-    id: string;
-    title: string;
-    author: string;
-    year: string;
-    venue: string;
-    url?: string;
-    month?: string;
-    type: string;
+  id: string;
+  title: string;
+  author: string;
+  year: string;
+  venue: string;
+  url: string;
+  month: string;
+  day: string;
+  type: string;
+  volume: string;
+  number: string;
+  pages: string;
+  note: string;
+  preprint: string;
+  bibtex: string;
 };
 
 function cleanLatex(text: string): string {
-    if (!text) return "";
-    let clean = text;
-
-    // Remove outer braces
-    if (clean.startsWith('{') && clean.endsWith('}')) {
-        clean = clean.slice(1, -1);
-    }
-
-    // Basic LaTeX command replacement
-    const replacements: [RegExp, string][] = [
-        [/\\{\\"\{a\}\}/g, "ä"],
-        [/\\{\\"\{o\}\}/g, "ö"],
-        [/\\{\\"\{u\}\}/g, "ü"],
-        [/\\{\\"\{A\}\}/g, "Ä"],
-        [/\\{\\"\{O\}\}/g, "Ö"],
-        [/\\{\\"\{U\}\}/g, "Ü"],
-        [/\\ss/g, "ß"],
-        [/\\{\\c\{c\}\}/g, "ç"],
-        [/\\{\\c\{C\}\}/g, "Ç"],
-        [/\\c\{c\}/g, "ç"],
-        [/\\c\{C\}/g, "Ç"],
-        [/\\'\{e\}/g, "é"],
-        [/\\'\{a\}/g, "á"],
-        [/\\'e/g, "é"],
-        [/--/g, "–"], // en-dash
-        [/[{}]/g, ""], // Remove remaining braces
-    ];
-
-    for (const [pattern, replacement] of replacements) {
-        clean = clean.replace(pattern, replacement);
-    }
-
-    // Clean up whitespace
-    return clean.replace(/\s+/g, ' ').trim();
+  const accents: Record<string, string> = { '"': '\u0308', "'": '\u0301', '`': '\u0300', '^': '\u0302', '~': '\u0303', c: '\u0327' };
+  return text
+    .replace(/\\(["'`^~c])\s*\{?([A-Za-z])\}?/g, (_, accent: string, letter: string) => (letter + accents[accent]).normalize('NFC'))
+    .replace(/\\ss\b/g, 'ß')
+    .replace(/\\&/g, '&')
+    .replace(/[{}]/g, '')
+    .replace(/--/g, '–')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
+// Read balanced fields so braces in names cannot truncate an author list.
+// Supports the braced, quoted and bare values used in this bibliography.
 export function parseBibtex(content: string): Publication[] {
-    const entries: Publication[] = [];
-    // Split by @entrytype{
-    const rawEntries = content.split(/@\w+\s*\{/);
-
-    // Skip the first empty chunk before the first entry
-    for (let i = 1; i < rawEntries.length; i++) {
-        const entryBlock = rawEntries[i].trim();
-        if (!entryBlock) continue;
-
-        // The ID is effectively everything up to the first comma
-        const idMatch = entryBlock.match(/^([^,]+),/);
-        if (!idMatch) continue;
-        const id = idMatch[1].trim();
-
-        // Extract fields
-        const getField = (fieldName: string) => {
-            // Regex to find fieldName = { ... } or fieldName = " ... "
-            const regex = new RegExp(`${fieldName}\\s*=\\s*[\\{"](.*?)[\\}"](?=[,\\n\\r])`, 'i');
-            // Regex for numbers
-            const numberRegex = new RegExp(`${fieldName}\\s*=\\s*(\\d+)`, 'i');
-            // Regex for unquoted strings (macros like feb, jun, etc.)
-            const macroRegex = new RegExp(`${fieldName}\\s*=\\s*([a-zA-Z]+)(?=[,\\n\\r])`, 'i');
-
-            const match = entryBlock.match(regex);
-            if (match) return cleanLatex(match[1]);
-
-            const numMatch = entryBlock.match(numberRegex);
-            if (numMatch) return numMatch[1];
-
-            const macroMatch = entryBlock.match(macroRegex);
-            if (macroMatch) return macroMatch[1];
-
-            return "";
-        };
-
-        const title = getField("title");
-        const author = getField("author");
-        const year = getField("year");
-        const month = getField("month");
-        const url = getField("url");
-        let venue = getField("journal");
-        if (!venue) venue = getField("booktitle");
-        if (!venue) venue = getField("publisher"); // Fallback for misc/articles without journal
-        if (!venue) venue = "Preprint"; // Fallback
-
-        const type = "article"; // Simplify for now
-
-        if (title) {
-            entries.push({
-                id,
-                title,
-                author,
-                year,
-                month, // Add month to object (implicitly added to type if not strict, but I'll update type separately if needed, TS might complain if I don't update type definition first, but `parseBibtex` return type is explicit. The user file has explicit type. I should update that too.)
-                venue,
-                url,
-                type
-            });
+  const entries: Publication[] = [];
+  const start = /@(\w+)\s*\{\s*([^,]+),/g;
+  let match: RegExpExecArray | null;
+  while ((match = start.exec(content))) {
+    const fields: Record<string, string> = {};
+    let cursor = start.lastIndex;
+    while (cursor < content.length) {
+      while (/[\s,]/.test(content[cursor] ?? '') && cursor < content.length) cursor++;
+      if (content[cursor] === '}') { cursor++; break; }
+      const field = /^([\w-]+)\s*=\s*/.exec(content.slice(cursor));
+      if (!field) throw new Error(`Invalid BibTeX field in ${match[2]}`);
+      cursor += field[0].length;
+      const opener = content[cursor];
+      let value = '';
+      if (opener === '{' || opener === '"') {
+        cursor++;
+        const valueStart = cursor;
+        let depth = opener === '{' ? 1 : 0;
+        for (; cursor < content.length; cursor++) {
+          const char = content[cursor];
+          if (char === '\\') { cursor++; continue; }
+          if (char === '{') depth++;
+          if (char === '}') depth--;
+          if ((opener === '{' && depth === 0) || (opener === '"' && char === '"' && depth === 0)) break;
         }
+        if (cursor === content.length) throw new Error(`Unclosed BibTeX value in ${match[2]}`);
+        value = content.slice(valueStart, cursor++);
+      } else {
+        const valueStart = cursor;
+        while (cursor < content.length && !/[,}\r\n]/.test(content[cursor])) cursor++;
+        value = content.slice(valueStart, cursor);
+      }
+      fields[field[1].toLowerCase()] = value.trim();
     }
-
-    // Helper to parse month to number (0-11)
-    const getMonthNum = (m?: string) => {
-        if (!m) return -1;
-        const normalized = m.toLowerCase().trim();
-        const months = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
-
-        // Check for 3-letter match
-        const index = months.findIndex(mon => normalized.startsWith(mon));
-        if (index !== -1) return index;
-
-        // Check for numeric
-        const num = parseInt(normalized);
-        if (!isNaN(num)) return num - 1; // 1-12 -> 0-11
-
-        return -1;
-    };
-
-    // Sort by year descending, then month descending
-    return entries.sort((a, b) => {
-        const yearA = parseInt(a.year) || 0;
-        const yearB = parseInt(b.year) || 0;
-        if (yearB !== yearA) {
-            return yearB - yearA;
-        }
-
-        const monthA = getMonthNum(a.month);
-        const monthB = getMonthNum(b.month);
-        if (monthB !== monthA) {
-            return monthB - monthA;
-        }
-
-        // Secondary sort by title so order is deterministic
-        return a.title.localeCompare(b.title);
+    const get = (key: string) => cleanLatex(fields[key] ?? '');
+    const venue = get('journal') || get('booktitle') || get('publisher');
+    const type = get('entrysubtype') || (venue === 'medRxiv' ? 'Preprint' : match[1].toLowerCase() === 'article' ? 'Journal article' : 'Conference contribution');
+    // Site-only relationship/type fields are excluded from the export.
+    const bibtexFields = Object.entries(fields).filter(([key]) => !['preprint', 'entrysubtype', 'day'].includes(key));
+    const bibtex = `@${match[1]}{${match[2].trim()},\n${bibtexFields.map(([key, value]) => `  ${key} = {${value}}`).join(',\n')}\n}`;
+    entries.push({
+      id: match[2].trim(), title: get('title'), author: get('author'), year: get('year'),
+      month: get('month'), day: get('day'), venue, type, volume: get('volume'), number: get('number'),
+      pages: get('pages'), note: get('note'), preprint: fields.preprint ?? '',
+      url: fields.url || (fields.doi ? `https://doi.org/${fields.doi}` : ''), bibtex,
     });
+    start.lastIndex = cursor;
+  }
+  const monthNumber = (month: string) => {
+    const index = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(month.toLowerCase().slice(0, 3));
+    return index >= 0 ? index + 1 : Number(month) || 0;
+  };
+  return entries.sort((a, b) => Number(b.year) - Number(a.year) || monthNumber(b.month) - monthNumber(a.month) || Number(b.day) - Number(a.day) || a.title.localeCompare(b.title));
 }
